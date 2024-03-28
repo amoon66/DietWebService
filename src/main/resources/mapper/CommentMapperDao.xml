@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.springproj.dietwebservice.repository.ICommentDAO">
+
+	<insert id="insertComment"
+		parameterType="com.springproj.dietwebservice.domain.CommentVO">
+        <![CDATA[
+            INSERT INTO COMMENTBOARD (SEQ, WRITER, CONTENT, BOARDSEQ)
+            VALUES ((SELECT NVL(MAX(SEQ), 0)+1 FROM COMMENTBOARD), #{writer}, #{content}, #{boardSeq})
+        ]]>
+	</insert>
+	
+	<update id="updateRep_ref" >
+   	 UPDATE CommentBoard SET REP_REF = SEQ WHERE SEQ = (SELECT MAX(SEQ) FROM CommentBoard)
+	</update>
+	
+	<insert id="insertReply"
+		parameterType="com.springproj.dietwebservice.domain.CommentVO">
+        <![CDATA[
+            INSERT INTO COMMENTBOARD (SEQ, WRITER, CONTENT, BOARDSEQ, REP_REF, REP_LEV, REP_SEQ)
+            VALUES ((SELECT NVL(MAX(SEQ), 0)+1 FROM COMMENTBOARD), #{writer}, #{content}, #{boardSeq},#{rep_ref},#{rep_lev},#{rep_seq})
+        ]]>
+	</insert>
+	
+	<select id="getMaxRep_seq" resultType="int">
+        <![CDATA[
+            SELECT MAX(REP_SEQ) FROM CommentBoard WHERE boardseq = #{boardSeq} AND REP_REF = #{rep_ref}
+        ]]>
+	</select>
+
+	<select id="getCommentsByBoardSeq"
+		resultType="com.springproj.dietwebservice.domain.CommentVO">
+        <![CDATA[
+            SELECT * FROM COMMENTBOARD WHERE BOARDSEQ = #{boardSeq} ORDER BY REP_REF, REP_SEQ ASC
+        ]]>
+	</select>
+
+	<delete id="deleteComment">
+        <![CDATA[
+            DELETE FROM COMMENTBOARD WHERE SEQ = #{seq}
+        ]]>
+	</delete>
+
+</mapper>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.springproj.dietwebservice.repository.IBoardDAO">
+
+	<insert id="insertBoard">
+	<![CDATA[
+		INSERT INTO DIETBOARD(SEQ, TITLE, WRITER, CONTENT, FILENAME) 
+		VALUES((SELECT NVL(MAX(SEQ), 0)+1 FROM DIETBOARD), #{title}, #{writer}, #{content}, #{fileName})
+	]]>
+	</insert>
+	
+	<select id="getListCount" resultType="int">
+		SELECT COUNT(*) FROM DIETBOARD
+		
+	</select>
+
+	<select id="getBoardList" resultType="com.springproj.dietwebservice.domain.BoardVO">
+		 SELECT * FROM (
+    SELECT rownum rnum, 
+           SEQ, 
+           TITLE, 
+           WRITER, 
+           CONTENT, 
+           REGDATE, 
+           CNT, 
+           FILENAME
+    FROM (
+        SELECT * 
+        FROM dietboard 
+        WHERE 1 = 1 
+        
+        AND (
+            
+            (#{searchCondition} = 'TITLE' AND TITLE LIKE '%' || #{searchKeyword} || '%')
+            OR
+            
+            (#{searchCondition} = 'CONTENT' AND CONTENT LIKE '%' || #{searchKeyword} || '%')
+        )
+        ORDER BY seq DESC
+       )
+	  ) 
+		WHERE rnum BETWEEN #{startrow} AND #{endrow}
+	</select>
+	
+	<select id="getBoard" resultType="com.springproj.dietwebservice.domain.BoardVO">
+	<![CDATA[
+		SELECT * FROM DIETBOARD WHERE SEQ = #{seq}
+		
+	]]>
+	</select>
+	
+	<update id="updateCnt" >
+	<![CDATA[
+		UPDATE DIETBOARD SET CNT = CNT+1 WHERE SEQ = #{seq}
+	]]>
+	</update>
+	
+	<select id="getUpdateBoard" resultType="com.springproj.dietwebservice.domain.BoardVO">
+	<![CDATA[
+		SELECT * FROM DIETBOARD WHERE SEQ = #{seq}
+	]]>
+	</select>
+	
+	<update id="updateBoard">
+	<![CDATA[
+		UPDATE DIETBOARD SET TITLE = #{title}, CONTENT = #{content} WHERE SEQ = #{seq}
+	]]>
+	</update>
+	
+	<delete id="deleteBoard">
+	<![CDATA[
+		DELETE FROM DIETBOARD WHERE SEQ = #{seq}
+	]]>
+	</delete>
+
+</mapper>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.springproj.dietwebservice.repository.IWorkoutDAO">
+	<select id="autocomplete" parameterType="map" resultType="map">
+	SELECT
+		 NAME
+	FROM WORKOUTINFO 
+	WHERE NAME LIKE  '%'|| #{value} || '%'
+	</select>
+
+	
+	<select id="getWorkoutBoardByDate" resultType="com.springproj.dietwebservice.domain.WorkoutBoardVO">
+	SELECT
+		SEQ,
+		WORKOUTNAME,
+		INPUTTIME,
+		KCAL,
+		REGDATE
+		 
+	FROM WORKOUTBOARD 
+   	 WHERE ID = #{id} 
+	 AND TRUNC(REGDATE) = TRUNC(#{regDate}) 
+	 ORDER BY SEQ DESC
+	</select>
+
+	<select id="getWorkoutInfo" resultType="com.springproj.dietwebservice.domain.WorkoutInfoVO">
+		
+       	 SELECT 
+            NAME,
+            MIN,
+            KCAL
+      	  FROM (
+            SELECT *
+            FROM WORKOUTINFO
+			WHERE NAME LIKE '%' || #{searchKeyword} || '%'
+            ORDER BY NAME
+       	 )
+       	<![CDATA[
+      	  WHERE ROWNUM <= 3
+   		]]>
+    
+	</select>
+
+
+	<select id="getWorkOutBoard" resultType="com.springproj.dietwebservice.domain.WorkoutBoardVO">
+	
+		SELECT * FROM WORKOUTBOARD 
+		WHERE ID = #{id} 
+		AND TRUNC(REGDATE) = TO_DATE(#{regDate}, 'YYYY-MM-DD') 
+		ORDER BY REGDATE
+	</select>
+	
+	<insert id="insertWorkoutBoard">
+		INSERT INTO WORKOUTBOARD(SEQ, ID, WORKOUTNAME, INPUTTIME, KCAL, REGDATE)
+		VALUES((SELECT NVL(MAX(SEQ),0)+1 FROM WORKOUTBOARD), #{id}, #{workoutName}, #{inputTime}, #{kcal}, #{regDate})		 
+	
+	</insert>
+	
+	<update id="updateWorkoutBoard">
+		UPDATE WORKOUTBOARD
+        SET INPUTTIME = #{inputTime},
+            KCAL = #{kcal}
+        WHERE SEQ = #{seq}
+	</update>
+	
+	<delete id="deleteWorkoutBoard">
+		DELETE FROM WORKOUTBOARD WHERE SEQ = #{seq}
+	</delete>
+</mapper>
